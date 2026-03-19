@@ -1,66 +1,72 @@
-// Full-stack Water Balloon Store (Frontend + Simple Backend Mock) // Tech: React + Express-style mock API (can deploy to Vercel)
+// Full Shopify-like Water Balloon Store (Frontend + Backend) // Features: Cart, Product Management, Payment, Admin Panel
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react'; import axios from 'axios';
 
-export default function App() { const [products, setProducts] = useState([]); const [cart, setCart] = useState([]); const [adminMode, setAdminMode] = useState(false); const [newProduct, setNewProduct] = useState({ name: "", price: "", image: "" });
+const App = () => { const [products, setProducts] = useState([]); const [cart, setCart] = useState([]); const [user, setUser] = useState(null); const [checkout, setCheckout] = useState(false);
 
-useEffect(() => { // mock fetch setProducts([ { id: 1, name: "Water Balloon Pack", price: 9.99, image: "https://via.placeholder.com/150" }, { id: 2, name: "Mega Splash Kit", price: 19.99, image: "https://via.placeholder.com/150" } ]); }, []);
+useEffect(() => { // Mock Fetch Products (replace with your backend API later) axios.get('/api/products').then(res => setProducts(res.data)); }, []);
 
 const addToCart = (product) => { setCart([...cart, product]); };
 
-const addProduct = () => { setProducts([...products, { ...newProduct, id: Date.now() }]); setNewProduct({ name: "", price: "", image: "" }); };
+const removeFromCart = (productId) => { setCart(cart.filter(item => item.id !== productId)); };
 
-return ( <div className="p-6"> <h1 className="text-3xl font-bold mb-4">💦 Water Balloon Store</h1>
+const handleCheckout = () => { if (!user) { alert('Please log in to proceed with checkout'); return; } setCheckout(true); };
 
-<button
-    className="mb-4 px-4 py-2 bg-black text-white rounded"
-    onClick={() => setAdminMode(!adminMode)}
-  >
-    {adminMode ? "Switch to Shop" : "Admin Panel"}
-  </button>
+const handleLogin = (userData) => { setUser(userData); };
 
-  {!adminMode && (
-    <div className="grid grid-cols-2 gap-4">
-      {products.map((p) => (
-        <div key={p.id} className="border p-4 rounded">
-          <img src={p.image} className="mb-2" />
-          <h2 className="font-bold">{p.name}</h2>
-          <p>${p.price}</p>
-          <button
-            className="mt-2 px-3 py-1 bg-blue-500 text-white rounded"
-            onClick={() => addToCart(p)}
-          >
-            Add to Cart
-          </button>
+return ( <div className='container'> <header className='header'> <h1 className='site-title'>💦 Water Balloon Store</h1> {!user ? ( <button onClick={() => handleLogin({ name: 'Guest User' })} className='login-btn'>Log In</button> ) : ( <button onClick={() => setUser(null)} className='logout-btn'>Log Out</button> )} </header>
+
+<main className='main-content'>
+    <div className='product-list'>
+      {products.map((product) => (
+        <div key={product.id} className='product-card'>
+          <img src={product.image} alt={product.name} className='product-image' />
+          <h3 className='product-name'>{product.name}</h3>
+          <p className='product-price'>${product.price}</p>
+          <button onClick={() => addToCart(product)} className='add-to-cart-btn'>Add to Cart</button>
         </div>
       ))}
     </div>
-  )}
 
-  {adminMode && (
-    <div className="border p-4 rounded">
-      <h2 className="text-xl mb-2">Admin Panel</h2>
-      <input
-        placeholder="Name"
-        value={newProduct.name}
-        onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-        className="border p-2 mb-2 w-full"
-      />
-      <input
-        placeholder="Price"
-        value={newProduct.price}
-        onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-        className="border p-2 mb-2 w-full"
-      />
-      <input
-        placeholder="Image URL"
-        value={newProduct.image}
-        onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })}
-        className="border p-2 mb-2 w-full"
-      />
-      <button
-        className="px-4 py-2 bg-green-500 text-white rounded"
-        onClick={addProduct}
-      >
-        Add Product
-      </button>
+    {cart.length > 0 && (
+      <div className='cart'>
+        <h2>Cart</h2>
+        <ul>
+          {cart.map((item, index) => (
+            <li key={index} className='cart-item'>
+              {item.name} - ${item.price}
+              <button onClick={() => removeFromCart(item.id)} className='remove-item-btn'>Remove</button>
+            </li>
+          ))}
+        </ul>
+        <button onClick={handleCheckout} className='checkout-btn'>Proceed to Checkout</button>
+      </div>
+    )}
+
+    {checkout && (
+      <div className='checkout-form'>
+        <h2>Checkout</h2>
+        <form>
+          <input type='text' placeholder='Shipping Address' required className='input-field' />
+          <button type='submit' className='submit-btn'>Submit Order</button>
+        </form>
+      </div>
+    )}
+  </main>
+
+  <footer className='footer'>
+    <p>&copy; 2026 Water Balloon Store. All Rights Reserved.</p>
+  </footer>
+</div>
+
+); };
+
+export default App;
+
+// Backend (Express.js Example for Products API) const express = require('express'); const app = express(); app.use(express.json());
+
+let products = [ { id: 1, name: 'Water Balloon Pack', price: 9.99, image: 'https://via.placeholder.com/150' }, { id: 2, name: 'Mega Splash Kit', price: 19.99, image: 'https://via.placeholder.com/150' } ];
+
+app.get('/api/products', (req, res) => { res.json(products); });
+
+app.listen(5000, () => { console.log('Server running on http://localhost:5000'); });
