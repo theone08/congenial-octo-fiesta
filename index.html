@@ -1,72 +1,511 @@
-// Full Shopify-like Water Balloon Store (Frontend + Backend) // Features: Cart, Product Management, Payment, Admin Panel
+<html lang="zh-CN<head>
+   <meta charset="UTF-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+ZURU | 夏日水球派对 轻奢玩乐新体验
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', 'Microsoft YaHei', sans-serif;
+        }
 
-import React, { useState, useEffect } from 'react'; import axios from 'axios';
+        /* 全局变量 */
+        :root {
+            --primary-color: #FF6B9D;
+            --secondary-color: #4FC3F7;
+            --accent-color: #FFD54F;
+            --dark-color: #1A1A2E;
+            --light-color: #F8F9FA;
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
 
-const App = () => { const [products, setProducts] = useState([]); const [cart, setCart] = useState([]); const [user, setUser] = useState(null); const [checkout, setCheckout] = useState(false);
+        body {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
 
-useEffect(() => { // Mock Fetch Products (replace with your backend API later) axios.get('/api/products').then(res => setProducts(res.data)); }, []);
+        /* 导航栏 */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 999;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
 
-const addToCart = (product) => { setCart([...cart, product]); };
+        .nav-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 1.2rem 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-const removeFromCart = (productId) => { setCart(cart.filter(item => item.id !== productId)); };
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
 
-const handleCheckout = () => { if (!user) { alert('Please log in to proceed with checkout'); return; } setCheckout(true); };
+        .nav-menu {
+            display: flex;
+            gap: 3rem;
+            list-style: none;
+        }
 
-const handleLogin = (userData) => { setUser(userData); };
+        .nav-menu a {
+            text-decoration: none;
+            color: var(--dark-color);
+            font-weight: 500;
+            font-size: 1.05rem;
+            transition: var(--transition);
+            position: relative;
+        }
 
-return ( <div className='container'> <header className='header'> <h1 className='site-title'>💦 Water Balloon Store</h1> {!user ? ( <button onClick={() => handleLogin({ name: 'Guest User' })} className='login-btn'>Log In</button> ) : ( <button onClick={() => setUser(null)} className='logout-btn'>Log Out</button> )} </header>
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--primary-color);
+            transition: var(--transition);
+        }
 
-<main className='main-content'>
-    <div className='product-list'>
-      {products.map((product) => (
-        <div key={product.id} className='product-card'>
-          <img src={product.image} alt={product.name} className='product-image' />
-          <h3 className='product-name'>{product.name}</h3>
-          <p className='product-price'>${product.price}</p>
-          <button onClick={() => addToCart(product)} className='add-to-cart-btn'>Add to Cart</button>
-        </div>
-      ))}
-    </div>
+        .nav-menu a:hover::after {
+            width: 100%;
+        }
 
-    {cart.length > 0 && (
-      <div className='cart'>
-        <h2>Cart</h2>
-        <ul>
-          {cart.map((item, index) => (
-            <li key={index} className='cart-item'>
-              {item.name} - ${item.price}
-              <button onClick={() => removeFromCart(item.id)} className='remove-item-btn'>Remove</button>
-            </li>
-          ))}
-        </ul>
-        <button onClick={handleCheckout} className='checkout-btn'>Proceed to Checkout</button>
-      </div>
-    )}
+        .cta-btn {
+            padding: 0.9rem 2.2rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 107, 157, 0.3);
+            transition: var(--transition);
+        }
 
-    {checkout && (
-      <div className='checkout-form'>
-        <h2>Checkout</h2>
-        <form>
-          <input type='text' placeholder='Shipping Address' required className='input-field' />
-          <button type='submit' className='submit-btn'>Submit Order</button>
-        </form>
-      </div>
-    )}
-  </main>
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 107, 157, 0.4);
+        }
 
-  <footer className='footer'>
-    <p>&copy; 2026 Water Balloon Store. All Rights Reserved.</p>
-  </footer>
+        /* 英雄区块 */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 0 2.5rem;
+            background: linear-gradient(135deg, rgba(255,245,247,0.8) 0%, rgba(235,245,255,0.8) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255,107,157,0.15) 0%, transparent 70%);
+            top: -100px;
+            right: -150px;
+            border-radius: 50%;
+        }
+
+        .hero-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5rem;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-content h1 {
+            font-size: 4.2rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1.8rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-content p {
+            font-size: 1.25rem;
+            color: #555;
+            margin-bottom: 3rem;
+            max-width: 550px;
+        }
+
+        .hero-btns {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .primary-btn {
+            padding: 1.1rem 3rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(255, 107, 157, 0.35);
+            transition: var(--transition);
+        }
+
+        .primary-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(255, 107, 157, 0.45);
+        }
+
+        .secondary-btn {
+            padding: 1.1rem 3rem;
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .secondary-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .hero-img {
+            width: 100%;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* 产品特点 */
+        .features {
+            padding: 10rem 2.5rem;
+            background: white;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 6rem;
+        }
+
+        .section-header h2 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+        }
+
+        .section-header p {
+            font-size: 1.15rem;
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 3rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 2rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+        }
+
+        .feature-card p {
+            font-size: 1rem;
+            color: #666;
+            line-height: 1.7;
+        }
+
+        /* 产品展示 */
+        .gallery {
+            padding: 10rem 2.5rem;
+            background: linear-gradient(135deg, #F8F9FA 0%, #EEF5FF 100%);
+        }
+
+        .gallery-grid {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+        }
+
+        .gallery-item {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.18);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 350px;
+            object-fit: cover;
+        }
+
+        /* 行动召唤 */
+        .cta {
+            padding: 8rem 2.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            text-align: center;
+            color: white;
+        }
+
+        .cta h2 {
+            font-size: 3.2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta p {
+            font-size: 1.25rem;
+            max-width: 700px;
+            margin: 0 auto 3.5rem;
+            opacity: 0.95;
+        }
+
+        .cta .primary-btn {
+            background: white;
+            color: var(--primary-color);
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .cta .primary-btn:hover {
+            background: var(--light-color);
+            transform: translateY(-4px);
+        }
+
+        /* 页脚 */
+        footer {
+            padding: 5rem 2.5rem 2rem;
+            background: var(--dark-color);
+            color: #ccc;
+        }
+
+        .footer-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 4rem;
+            margin-bottom: 4rem;
+        }
+
+        .footer-col h3 {
+            color: white;
+            font-size: 1.4rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .footer-col h3::after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 2px;
+            bottom: -10px;
+            left: 0;
+            background: var(--primary-color);
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 1rem;
+        }
+
+        .footer-col ul li a {
+            color: #ccc;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-col ul li a:hover {
+            color: var(--primary-color);
+            padding-left: 5px;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.95rem;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 1024px) {
+            .hero-content h1 {
+                font-size: 3.2rem;
+            }
+            .hero-container {
+                gap: 3rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+            .hero-container {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .hero-content h1 {
+                font-size: 2.8rem;
+            }
+            .hero-content p {
+                margin: 0 auto 3rem;
+            }
+            .hero-btns {
+                justify-content: center;
+            }
+            .section-header h2 {
+                font-size: 2.4rem;
+            }
+            .cta h2 {
+                font-size: 2.6rem;
+            }
+        }</style>
+<body><!-- 导航栏<header><div class="nav-container">
+            <a href="#" class="logo">ZURU<ul class="nav-menu">
+               <a href="#home">首页</a><li<a href="#features"></li>
+                <li><a href="#gallery">产品</li>
+                <li><a href="#about">品牌故事</li>
+</ul>
+           <button class="cta-btn</button></div>
+</header>
+
+   <!-- 英雄区块 -->
+<section class="hero" id="home">
+<div class="hero<div class="hero-content">
+<h1>一秒<br>解锁夏日狂欢</h1>
+               <p>ZURU轻奢水气球系列，颠覆传统玩乐体验，自动封口、极速充水，打造专属夏日派对，让欢乐</p><div class="hero-btns">
+<button class="primary</button<button class="secondary-btn">了解更多</button>
+                </div<div class="hero-img-wrap">
+<img src="https://picsum.photos/id/96/800/800" alt="ZURU水气球产品图" class="hero-img">
+            </div>
+        </section<!-- 产品<section class="features" id="<div class="section-header">
+<h2>核心</h2>
+<p>匠心工艺打造高品质水气球，每一处细节都为极致玩乐</p>
 </div>
+       <div class="features-grid<div class="feature-card">
+               <div class="feature-icon</div>
+<h3>极速</h3>
+<p>创新注水设计，数十秒即可完成上百个水气球填充，告别繁琐耗时的传统操作，派对即刻开启。</p>
+            <div class="feature-card">
+<div class="feature</div><h3></h3><p>专利密封技术，充水完成自动封口，无需手动打结，省时省力，杜绝漏水</p>
+</div>
+           <div class="feature-card<div class="feature-icon">🌿<h</h3>
+                <p>食品级环保乳胶材质，柔软有弹性，安全无异味，儿童放心玩耍，绿色无污染。</div><div class="feature-card">
+                <div class="feature-icon"></div>
+               <h3>缤纷色彩</h3>
+               <p>高饱和马卡龙色系，视觉质感拉满，不仅是玩乐神器，更是夏日拍照打卡的绝佳道具。</div></div>
+</section>
 
-); };
+   <!-- 产品展示 -->
+<section class="gallery" id="gallery">
+<div class="section<h</h2>
+            <p>高清实拍，见证ZURU水气球的轻奢质感与玩乐魅力</div><div class="gallery-grid">
+            <div class="gallery-item"><img src="https://picsum.photos/id/96/600/400" alt="ZURU水气球实拍1"></div>
+<div class="gallery<img src="https://picsum.photos/id/102/600/400" alt="ZURU水气球实拍2">
+            <div class="gallery-item">
+<img src="https://picsum.photos/id/155/600/400" alt="ZURU水气球实拍3"></div>
+<div class="gallery<img src="https://picsum.photos/id/160/600/400" alt="ZURU水气球实拍4">
+            </div</section><!-- 行动召唤<section class="cta" id="buy<h2>开启夏日轻奢派对</h2>
+        <p>限时特惠中，即刻入手ZURU水气球，让这个夏天充满缤纷欢乐，定格美好瞬间</p>
+        <button class="primary-btn"></button>
+</section>
 
-export default App;
-
-// Backend (Express.js Example for Products API) const express = require('express'); const app = express(); app.use(express.json());
-
-let products = [ { id: 1, name: 'Water Balloon Pack', price: 9.99, image: 'https://via.placeholder.com/150' }, { id: 2, name: 'Mega Splash Kit', price: 19.99, image: 'https://via.placeholder.com/150' } ];
-
-app.get('/api/products', (req, res) => { res.json(products); });
-
-app.listen(5000, () => { console.log('Server running on http://localhost:5000'); });
+   <!-- 页脚 -->
+<footer>
+       <div class="footer-container<div class="footer-col">
+               <h3>ZUR</h3>
+<p>专注高品质玩乐产品，打造极致用户体验，引领夏日玩乐新</p>
+</div>
+           <div class="footer-col<h3</h3<ul>
+                    <li><a href="#home">首页</li>
+                   <a href="#features">产品特点</a></li>
+                    <a href="#gallery">产品展示</a><li<a href="#buy"></li</ul></div>
+<div class="footer<h</h<ul>
+                    <li><a href="#">购买指南</li>
+                   <a href="#"></li>
+                    <li><a href="#">常见问题</li>
+                   <a href="#"></li</ul></div>
+<div class="footer<h</h<ul>
+                    <li><a href="#">Instagram</a></li>
+                    <a href="#">Facebook</li>
+<a href</li>
+                    <li><a href="#">抖音</a></li>
+                </div</div><div class="copyright">
+            <p>&copy; 2026 ZURU. 保留所有权利 | 轻奢夏日玩乐品牌</div></footer>
+</html>
